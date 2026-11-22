@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FCSIT BookIt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#3B5BDB;--blue-d:#2F4AC0;--blue-50:#EEF1FD;--lav:#DDDCFC;--ink:#0B0B12;--muted:#6B6F80;--line:#E6E7EF;
+  --red:#E03131;--red-50:#FFF0F0;--green:#2F9E44;--green-50:#EBFBEE;--amber:#E8590C;--amber-50:#FFF4E6;--grey:#C3C3C3;--bg:#FFFFFF;
+  --r:22px;--fd:'Archivo','Arial Black','Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#F3F4F8;color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--blue)}
+.h{font-family:var(--fd)}
+/* ---------- student shell ---------- */
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:96px;box-shadow:0 0 0 1px var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 0}
+.avatar{width:48px;height:48px;border-radius:50%;background:var(--lav);display:grid;place-items:center;border:0;cursor:pointer;color:var(--blue)}
+.brandmini{font:800 13px var(--fd);letter-spacing:.08em;color:var(--blue);text-transform:uppercase}
+main{padding:0 22px}
+.title{font:900 34px/1.05 var(--fd);text-transform:uppercase;text-align:center;margin:34px 0 8px;letter-spacing:-.01em}
+.subtitle{text-align:center;color:#1d2340;margin:0 0 26px;font-size:16px}
+.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px calc(10px + env(safe-area-inset-bottom));z-index:20}
+.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#8A8EA3;font:600 11px Inter;padding:6px 0;border-radius:12px}
+.tabbar a.on{color:var(--blue)}
+.tabbar a.on svg{background:var(--lav);border-radius:10px}
+.tabbar svg{width:36px;height:26px;padding:3px 8px}
+/* ---------- components ---------- */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:20px;padding:20px;font:800 19px var(--fd);cursor:pointer;background:var(--blue);color:#fff;text-decoration:none;transition:background .15s}
+.btn:hover{background:var(--blue-d)}
+.btn.outline{background:#fff;color:var(--blue);border:3px solid var(--blue)}
+.btn.outline:hover{background:var(--blue-50)}
+.btn.sm{padding:12px 16px;font-size:15px;border-radius:14px;width:auto}
+.btn.ghost{background:transparent;color:var(--blue);border:0}
+.btn.danger{background:var(--red)}
+.btn.white{background:#fff;color:var(--blue)}
+.btn:disabled{background:var(--grey);cursor:not-allowed;color:#fff}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;align-items:center}
+.between{justify-content:space-between}
+.label{font:800 17px var(--fd);color:var(--blue);margin:0 0 8px 6px;display:block}
+.field{width:100%;border:3px solid var(--blue);border-radius:20px;padding:16px 18px;font:700 15px var(--fd);background:#fff;appearance:none;outline:none}
+.field:focus{box-shadow:0 0 0 4px var(--lav)}
+select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%233B5BDB' stroke-width='2.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 18px center}
+.field[readonly]{border-color:var(--line);background:#FAFAFD}
+.err{color:var(--red);font-size:13px;margin:6px 0 0 6px;font-weight:600}
+.notice{display:flex;gap:10px;align-items:flex-start;background:var(--blue-50);border:1.5px solid #C9D2F7;color:#1d2a6b;border-radius:16px;padding:12px 14px;font-size:14px;font-weight:600}
+.notice svg{flex:none;margin-top:1px}
+.notice.warn{background:var(--amber-50);border-color:#FFD8A8;color:#7a3205}
+.notice.bad{background:var(--red-50);border-color:#FFC9C9;color:#8a1c1c}
+.notice.good{background:var(--green-50);border-color:#B2F2BB;color:#1b5e2a}
+.card{background:#fff;border:3px solid var(--blue);border-radius:var(--r);padding:20px}
+.card.soft{border:1.5px solid var(--line)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:14px}
+.kv span:first-child{color:var(--muted)}
+.kv span:last-child{font-weight:700;color:var(--blue);text-align:right}
+.section-h{font:800 22px var(--fd);color:var(--blue);margin:30px 0 12px}
+.hint{color:var(--muted);font-size:13px}
+.center{text-align:center}
+/* blue hero cards */
+.bluecard{position:relative;overflow:hidden;background:var(--blue);color:#fff;border-radius:var(--r);padding:20px;min-height:150px;cursor:pointer;border:0;text-align:left;width:100%;display:block;text-decoration:none}
+.bluecard.grey{background:#C3C3C3;cursor:default}
+.bluecard.grey .bc-sub,.bluecard.grey .bc-title{color:#6b6f84}
+.bluecard .sofa{position:absolute;right:-14px;bottom:-12px;width:190px;opacity:.95}
+.bc-title{font:800 16px var(--fd);color:#0B0B12;position:relative}
+.bc-big{font:900 25px/1.15 var(--fd);margin:4px 0 14px;position:relative}
+.bc-sub{font-size:13px;opacity:.9;position:relative;max-width:58%}
+.tiles{display:flex;gap:8px;position:relative}
+.tile{width:56px;height:64px;border-radius:12px;background:#fff;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tile small{font:500 10px Inter;letter-spacing:.04em}
+.tile b{font:900 28px/1 var(--fd)}
+.tile.o{background:transparent;border:1.5px solid rgba(255,255,255,.8);color:#fff}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--ink);font:700 11.5px Inter;border-radius:99px;padding:5px 10px;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.st-confirmed{color:var(--blue)} .st-checked-in{color:var(--green)} .st-completed{color:#5c6070} .st-cancelled{color:var(--red)} .st-auto-cancelled{color:var(--amber)}
+.pill.st-confirmed{background:var(--blue-50)} .pill.st-checked-in{background:var(--green-50)} .pill.st-completed{background:#F1F2F5} .pill.st-cancelled{background:var(--red-50)} .pill.st-auto-cancelled{background:var(--amber-50)}
+.bluecard .pill{background:#fff;position:absolute;top:18px;right:18px}
+/* live feed */
+.feed{position:relative;overflow:hidden;border-radius:var(--r);padding:18px 20px;min-height:112px;border:1.5px solid #C9C7F6;background:#fff}
+.feed::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-70%;height:120%;background:radial-gradient(ellipse at 40% 30%,var(--glow) 0%,transparent 65%);opacity:.35;pointer-events:none}
+.feed .nm{display:flex;align-items:center;gap:8px;font:800 16px var(--fd);color:var(--c)}
+.feed .nm i{width:22px;height:22px;border-radius:50%;background:var(--c)}
+.feed .pct{position:absolute;right:20px;bottom:14px;font:900 26px var(--fd);color:var(--c);z-index:1}
+.feed .tag{font-size:11.5px;color:var(--muted);margin-top:6px;position:relative;z-index:1}
+.lvl-quiet,.lvl-empty{--c:var(--green);--glow:#69DB7C}
+.lvl-moderate{--c:var(--blue);--glow:#748FFC}
+.lvl-busy,.lvl-packed{--c:var(--red);--glow:#FF8787}
+/* active session */
+.session{background:linear-gradient(160deg,#2F9E44,#237A35);color:#fff;border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.session .count{font:900 44px/1 var(--fd);letter-spacing:.02em;margin:10px 0 6px;font-variant-numeric:tabular-nums}
+.session .bar{height:8px;background:rgba(255,255,255,.25);border-radius:9px;overflow:hidden;margin:12px 0}
+.session .bar b{display:block;height:100%;background:#fff;border-radius:9px}
+.session .meta{display:flex;justify-content:space-between;font-size:13px;opacity:.95}
+.session.ending{background:linear-gradient(160deg,#E8590C,#C2410C)}
+.session .rem{margin-top:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:14px;padding:10px 12px;font-size:13.5px;font-weight:600}
+.demo{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:center;margin-top:8px}
+.demo button{border:1px dashed #b5b8c8;background:#fafafd;border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer;color:#555}
+.session .demo{color:rgba(255,255,255,.85)} .session .demo button{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5);color:#fff}
+/* slot picker */
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.day{flex:none;width:62px;border:2.5px solid var(--blue);border-radius:16px;padding:8px 0;text-align:center;background:#fff;cursor:pointer;color:var(--blue)}
+.day small{display:block;font:600 12px Inter}
+.day b{font:900 22px var(--fd)}
+.day.on{background:var(--blue);color:#fff}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.slot{border:2.5px solid var(--blue);background:#fff;border-radius:16px;padding:12px 14px;text-align:left;cursor:pointer;color:var(--blue)}
+.slot b{display:block;font:800 14px var(--fd)}
+.slot small{font-size:12px;font-weight:600}
+.slot.sel{background:var(--blue);color:#fff}
+.slot.booked,.slot.past{background:#EDEDF0;border-color:#EDEDF0;color:#9a9cab;cursor:not-allowed}
+.slot.limit{border-style:dashed;border-color:#B9C2EE;color:#9AA6DA;background:#FAFBFF;cursor:not-allowed}
+/* pod layout */
+.layout{border:3px solid var(--blue);border-radius:var(--r);padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;min-height:330px;align-content:start}
+.zone{height:100px;border:3px solid var(--blue);border-radius:18px;background:#fff;color:var(--blue);font:800 17px var(--fd);cursor:pointer}
+.zone.on{background:var(--blue);color:#fff}
+.zone.x{background:#C3C3C3;border-color:#C3C3C3;cursor:not-allowed;display:grid;place-items:center}
+.entrance{position:absolute;left:-3px;bottom:26px;display:flex;align-items:center;gap:8px}
+.entrance i{width:10px;height:80px;background:#000;display:block}
+.entrance span{writing-mode:vertical-rl;font:900 11px var(--fd);letter-spacing:.05em}
+/* check-in requirement */
+.req{border:3px solid var(--blue);border-radius:var(--r);padding:18px}
+.req h3{font:800 18px var(--fd);margin:0 0 10px;color:var(--blue);display:flex;gap:8px;align-items:center}
+.req p{font-size:14px;line-height:1.5;margin:0 0 14px;color:#1d2340}
+.req-items{display:grid;gap:8px}
+.req-item{display:flex;gap:12px;align-items:center;background:var(--blue-50);border-radius:14px;padding:10px 12px;font-weight:700;font-size:14px}
+.req-item svg{flex:none;color:var(--blue)}
+.req-item small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+/* tabs */
+.seg{display:flex;justify-content:center;gap:10px;margin:0 0 18px}
+.seg button{width:150px;border:2.5px solid var(--blue);border-radius:14px;padding:10px;background:#fff;color:var(--blue);font:800 14px var(--fd);cursor:pointer}
+.seg button.on{background:var(--blue);color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:-6px 0 16px}
+/* area card */
+.area{border:1.5px solid var(--line);border-radius:var(--r);padding:18px}
+.area .pct{font:900 40px/1 var(--fd);color:var(--c)}
+.area .track{height:10px;background:#EEF0F6;border-radius:9px;overflow:hidden;margin:12px 0 10px}
+.area .track b{display:block;height:100%;background:var(--c);border-radius:9px}
+.badge{display:inline-flex;align-items:center;gap:6px;font:700 12px Inter;border-radius:99px;padding:5px 10px;color:var(--c);background:color-mix(in srgb,var(--c) 12%,#fff)}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.est{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#6B6F80;background:#F3F4F8;border-radius:8px;padding:3px 8px}
+.livetag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#fff;background:var(--c);border-radius:8px;padding:3px 8px}
+/* auth */
+.auth{max-width:480px;margin:0 auto;min-height:100vh;background:#fff;padding:24px 22px 40px}
+.logo{width:64px;height:64px;border-radius:20px;background:var(--blue);color:#fff;display:grid;place-items:center;font:900 30px var(--fd);margin:30px auto 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2.5px solid var(--blue);border-radius:14px;padding:9px 12px;background:#fff;color:var(--blue);font:700 13px Inter;cursor:pointer}
+.chip.on{background:var(--blue);color:#fff}
+.chip[disabled]{cursor:default}
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(11,11,18,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+@media(min-width:640px){.scrim{align-items:center}}
+.sheet{background:#fff;width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:24px 22px 28px;max-height:92vh;overflow:auto}
+@media(min-width:640px){.sheet{border-radius:26px}}
+.sheet h2{font:900 22px var(--fd);margin:0 0 6px}
+.qr{width:180px;height:180px;margin:16px auto;display:block;border:3px solid var(--blue);border-radius:18px;padding:12px}
+.notif{border:1.5px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 8px 24px rgba(20,30,90,.1)}
+.notif .app-n{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:6px}
+.notif .app-n b{width:20px;height:20px;border-radius:6px;background:var(--blue);color:#fff;display:grid;place-items:center;font:900 11px var(--fd)}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.three button{border:2.5px solid var(--c);color:var(--c);background:#fff;border-radius:14px;padding:12px 4px;font:800 14px var(--fd);cursor:pointer}
+.three button:hover{background:var(--c);color:#fff}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:600;font-size:14px;z-index:60;max-width:90vw;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+/* ---------- admin shell ---------- */
+.admin{display:grid;grid-template-columns:240px 1fr;min-height:100vh;background:#F3F4F8}
+.side{background:var(--blue);color:#fff;padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.side .brand{display:flex;gap:10px;align-items:center;font:900 17px var(--fd);margin:0 8px 26px}
+.side .brand b{width:36px;height:36px;border-radius:11px;background:#fff;color:var(--blue);display:grid;place-items:center}
+.side .brand small{display:block;font:600 11px Inter;opacity:.8}
+.side a{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;padding:11px 12px;border-radius:12px;font-weight:600;font-size:14px;opacity:.85}
+.side a:hover{background:rgba(255,255,255,.1);opacity:1}
+.side a.on{background:#fff;color:var(--blue);opacity:1}
+.side .out{margin-top:auto}
+.amain{padding:28px 32px 60px;min-width:0}
+.ah{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.ah h1{font:900 30px var(--fd);margin:0;text-transform:uppercase}
+.ah p{margin:4px 0 0;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat{background:#fff;border-radius:20px;padding:18px;border:1.5px solid var(--line)}
+.stat small{color:var(--muted);font-weight:600;font-size:13px}
+.stat b{display:block;font:900 36px var(--fd);color:var(--blue);margin-top:6px}
+.stat.hero{background:var(--blue);border-color:var(--blue);color:#fff}.stat.hero small{color:#dfe4ff}.stat.hero b{color:#fff}
+.panel{background:#fff;border-radius:20px;border:1.5px solid var(--line);padding:20px}
+.panel h3{font:800 18px var(--fd);margin:0 0 14px}
+.qnav{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.qnav a{background:#fff;border:2.5px solid var(--blue);border-radius:18px;padding:16px 12px;text-decoration:none;color:var(--blue);font:800 14px var(--fd);display:flex;flex-direction:column;gap:10px}
+.qnav a:hover{background:var(--blue);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;border-bottom:1.5px solid var(--line)}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.ib{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.ib:hover{border-color:var(--blue);color:var(--blue)}
+.ib.r:hover{border-color:var(--red);color:var(--red)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.mini{width:100%;border:1.5px solid #cfd3e3;border-radius:12px;padding:11px 12px;font-size:14px;background:#fff;outline:none}
+.mini:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--lav)}
+.flabel{font-weight:600;font-size:13px;margin:0 0 6px;display:block;color:#33364a}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.act{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.act:last-child{border-bottom:0}
+.act .dot{width:34px;height:34px;flex:none;border-radius:11px;background:var(--blue-50);display:grid;place-items:center;color:var(--blue)}
+.mslots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mslots div{font-size:12px;font-weight:600;padding:8px;border-radius:10px;text-align:center;background:var(--green-50);color:var(--green)}
+.mslots div.b{background:var(--red-50);color:var(--red)}
+.atop{display:none}
+@media(max-width:860px){
+  .admin{grid-template-columns:1fr}
+  .side{display:none}
+  .atop{display:block;background:var(--blue);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
+  .atop .brand{font:900 16px var(--fd);display:flex;justify-content:space-between;align-items:center}
+  .atop nav{display:flex;gap:6px;overflow-x:auto;margin-top:10px}
+  .atop nav a{color:#fff;text-decoration:none;white-space:nowrap;font-size:13px;font-weight:600;padding:7px 11px;border-radius:10px;background:rgba(255,255,255,.12)}
+  .atop nav a.on{background:#fff;color:var(--blue)}
+  .amain{padding:20px 16px 50px}
+  .stats{grid-template-columns:1fr 1fr}
+  .qnav{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="modal"></div>
+<div id="toast"></div>
+<script>
+/* =========================================================
+   FCSIT BookIt — frontend prototype (no backend; in-memory state)
+   ========================================================= */
+const M = 60000, H = 60 * M, DAY = 24 * H;
+const OPEN = 8, CLOSE = 20; // bookable hours 8:00–20:00
+const now = () => Date.now();
+const dayStart = t => { const d = new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+const at = (day, h) => dayStart(day) + h * H;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fT = t => new Date(t).toLocaleTimeString('en-MY',{hour:'numeric',minute:'2-digit',hour12:true}).replace(' ', ' ').toUpperCase();
+const fD = t => { const d=new Date(t), o=k=>d.toLocaleDateString('en-GB',k); return `${o({weekday:'short'})}, ${d.getDate()} ${o({month:'short'})} ${d.getFullYear()}`; };
+const fDT = t => `${fD(t)}, ${fT(t)}`;
+const mon = t => new Date(t).toLocaleDateString('en-GB',{month:'short'}).toUpperCase();
+const dnum = t => new Date(t).getDate();
+const hm = h => fT(at(now(), h));
+const isToday = t => dayStart(t) === dayStart(now());
+const rel = t => { const d = Math.round((dayStart(t) - dayStart(now()))/DAY); return d===0?'Today':d===1?'Tomorrow':d===-1?'Yesterday':new Date(t).toLocaleDateString('en-GB',{weekday:'short'}); };
+const ago = t => { const m = Math.round((now()-t)/M); return m<1?'just now':m<60?`${m} min ago`:m<1440?`${Math.round(m/60)} h ago`:`${Math.round(m/1440)} d ago`; };
+
+/* ---------- icons ---------- */
+const I = {
+  user:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c1.5-3.5 4-5 7-5s5.5 1.5 7 5"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  bars:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 20v-6M12 20V5M19 20v-9"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
+  qr:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM18 18h3v3M14 20h2"/></svg>',
+  clock:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  xc:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
+  info:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  bell:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15zM10 20.5a2 2 0 004 0"/></svg>',
+  users:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 19c1-3 3.3-4.5 6-4.5s5 1.5 6 4.5M16 4.5a3.5 3.5 0 010 7M18 14.5c1.6.6 2.6 2 3 4.5"/></svg>',
+  door:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M5 21V4a1 1 0 011-1h9l4 2v16"/><path d="M3 21h18M12 12v1"/></svg>',
+  book:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="4" width="16" height="17" rx="2.5"/><path d="M8 2.5v3M16 2.5v3M8 11h8M8 15h5"/></svg>',
+  log:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 7v5l3 2"/><path d="M3.5 12a8.5 8.5 0 102.5-6L3.5 8.5M3.5 4v4.5H8"/></svg>',
+  grid:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>',
+  out:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3M10 16l-4-4 4-4M6 12h10"/></svg>',
+  no:'<svg width="44" height="44" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#000"/><rect x="5.5" y="10.5" width="13" height="3" fill="#C3C3C3"/></svg>',
+};
+const SOFA = `<svg class="sofa" viewBox="0 0 220 120" aria-hidden="true"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E3E4FD"/><stop offset="1" stop-color="#BFC3F4"/></linearGradient></defs>
+<rect x="38" y="18" width="150" height="62" rx="16" fill="url(#sg)"/><path d="M88 22v54M138 22v54" stroke="#B3B7EE" stroke-width="2"/>
+<rect x="14" y="46" width="40" height="66" rx="16" fill="#CDD0F7"/><rect x="172" y="46" width="40" height="66" rx="16" fill="#CDD0F7"/>
+<rect x="44" y="72" width="138" height="34" rx="10" fill="#E6E7FD"/><path d="M90 74v30M136 74v30" stroke="#C3C6F2" stroke-width="2"/></svg>`;
+const QR = (() => { let s='<svg class="qr" viewBox="0 0 25 25" shape-rendering="crispEdges">'; const f=(x,y)=>{s+=`<rect x="${x}" y="${y}" width="7" height="7" fill="#0B0B12"/><rect x="${x+1}" y="${y+1}" width="5" height="5" fill="#fff"/><rect x="${x+2}" y="${y+2}" width="3" height="3" fill="#0B0B12"/>`}; f(0,0);f(18,0);f(0,18); for(let y=0;y<25;y++)for(let x=0;x<25;x++){ if((x<8&&y<8)||(x>16&&y<8)||(x<8&&y>16))continue; if(((x*7+y*13+x*y)%5)<2) s+=`<rect x="${x}" y="${y}" width="1" height="1" fill="#3B5BDB"/>`;} return s+'</svg>'; })();
+
+/* ---------- data ---------- */
+const AREAS_LIST = ['Student Lounge','Faculty Cafe','Open Study Area','Level 3 Foyer'];
+const FREE_TIMES = ['Morning (8–12)','Afternoon (12–4)','Evening (4–8)','Weekends'];
+const S = {
+  user:null, route:'', flow:{}, tab:'upcoming', adminFilter:'all', logQ:'', editProfile:false, refN:1043,
+  users:[
+    {id:'u1',role:'student',name:'Siti Aisyah binti Rahman',matric:'U2100123',email:'student@siswa.um.edu.my',password:'bookit123',area:'Open Study Area',free:['Afternoon (12–4)','Evening (4–8)']},
+    {id:'u2',role:'student',name:'Lim Wei Jie',matric:'U2100456',email:'weijie@siswa.um.edu.my',password:'x',area:'Student Lounge',free:['Morning (8–12)']},
+    {id:'u3',role:'student',name:'Arjun Nair',matric:'U2100789',email:'arjun@siswa.um.edu.my',password:'x',area:'Faculty Cafe',free:['Afternoon (12–4)']},
+    {id:'u4',role:'student',name:'Nur Hidayah',matric:'U2101011',email:'hidayah@siswa.um.edu.my',password:'x',area:'Level 3 Foyer',free:['Evening (4–8)','Weekends']},
+    {id:'a1',role:'admin',name:'Faculty Facilities Office',email:'admin@fsktm.um.edu.my',matric:'ADMIN',password:'admin123'},
+  ],
+  rooms:[
+    {id:'r1',name:'Discussion Pod A',type:'Discussion Pod',level:2,block:'B',seats:4,features:'Whiteboard · Display',active:true},
+    {id:'r2',name:'Discussion Pod B',type:'Discussion Pod',level:2,block:'B',seats:4,features:'Whiteboard',active:true},
+    {id:'r3',name:'Discussion Pod C',type:'Discussion Pod',level:1,block:'A',seats:6,features:'Display · Power outlets',active:true},
+    {id:'r4',name:'Discussion Pod D',type:'Discussion Pod',level:1,block:'A',seats:4,features:'Whiteboard',active:true},
+    {id:'r5',name:'Meeting Room 1',type:'Meeting Room',level:3,block:'B',seats:10,features:'Projector · Video call',active:true},
+    {id:'r6',name:'Meeting Room 2',type:'Meeting Room',level:3,block:'B',seats:8,features:'Projector · Whiteboard',active:true},
+  ],
+  areas:[
+    {id:'a1',name:'Student Lounge',loc:'Block A · Level 1',cap:60,taken:35,upd:now()-2*M,live:null},
+    {id:'a2',name:'Faculty Cafe',loc:'Block B · Ground floor',cap:100,taken:86,upd:now()-1*M,live:null},
+    {id:'a3',name:'Open Study Area',loc:'Block B · Level 2',cap:50,taken:12,upd:now()-4*M,live:null},
+    {id:'a4',name:'Level 3 Foyer',loc:'Block B · Level 3',cap:40,taken:7,upd:now()-3*M,live:null},
+  ],
+  bookings:[], logs:[],
+};
+const room = id => S.rooms.find(r => r.id === id);
+const userById = id => S.users.find(u => u.id === id);
+const log = (actor, action, ref, t=now()) => S.logs.unshift({t, actor, action, ref});
+
+function mkBooking(userId, roomId, start, end, status, extra={}) {
+  const b = {ref:'FCSIT-RB-'+(S.refN++), userId, roomId, start, end, attendees:extra.att||room(roomId).seats, purpose:extra.purpose||'Group assignment discussion', status, created:extra.created||start-2*DAY, zone:extra.zone||null};
+  S.bookings.push(b); return b;
+}
+(function seed(){
+  const t = now(), D = d => t + d*DAY;
+  // current student: one starting right now (check-in window open), one upcoming, plus history
+  const s0 = Math.floor((t - 4*M)/(5*M))*5*M;
+  const b1 = mkBooking('u1','r1', s0, s0+2*H, 'confirmed', {att:4, created:t-DAY});
+  const b2 = mkBooking('u1','r5', at(D(3),10), at(D(3),12), 'confirmed', {att:8, purpose:'FYP supervisor meeting', created:t-3*H});
+  const b3 = mkBooking('u1','r4', at(D(-2),15), at(D(-2),16), 'completed', {att:4});
+  const b4 = mkBooking('u1','r2', at(D(-5),9), at(D(-5),11), 'auto-cancelled', {att:3});
+  const b5 = mkBooking('u1','r3', at(D(-7),13), at(D(-7),14), 'cancelled', {att:5});
+  // other students
+  const o = [
+    ['u2','r2',0,9,2],['u3','r6',0,14,2],['u4','r3',0,16,1],['u2','r5',1,11,2],['u3','r1',1,9,1],['u4','r2',2,15,2],
+    ['u2','r6',-1,10,2],['u3','r4',-1,13,1],['u4','r1',-3,16,2],['u2','r3',-4,11,1],
+  ];
+  o.forEach(([u,r,d,h,len]) => {
+    const st = at(D(d),h), en = st+len*H;
+    const status = en < t ? 'completed' : st > t ? 'confirmed' : 'checked-in';
+    mkBooking(u,r,st,en,status,{att:Math.min(room(r).seats,3+len)});
+  });
+  S.bookings.find(b=>b.userId==='u3'&&b.roomId==='r4').status='auto-cancelled';
+  // logs
+  [...S.bookings].sort((a,b)=>a.created-b.created).forEach(b=>{
+    const n = userById(b.userId).name.split(' ')[0];
+    log(n, `Booked ${room(b.roomId).name}`, b.ref, b.created);
+    if (b.status==='completed'||b.status==='checked-in') log(n, `Checked in to ${room(b.roomId).name}`, b.ref, b.start+5*M);
+    if (b.status==='completed') log('System', `Session completed · ${room(b.roomId).name}`, b.ref, b.end);
+    if (b.status==='cancelled') log(n, `Cancelled ${room(b.roomId).name}`, b.ref, b.start-DAY);
+    if (b.status==='auto-cancelled') log('System', `Auto-cancelled (no check-in within 15 min)`, b.ref, b.start+15*M);
+  });
+  S.logs = S.logs.filter(l=>l.t<=t).sort((a,b)=>b.t-a.t);
+})();
+
+/* ---------- derived ---------- */
+const level = p => p < 40 ? 'quiet' : p <= 70 ? 'moderate' : 'busy';
+const LV = {quiet:'Quiet',moderate:'Moderate',busy:'Busy',empty:'Empty',packed:'Packed'};
+const liveActive = a => a.live && a.live.exp > now();
+const areaPct = a => Math.round(a.taken / a.cap * 100);
+const ACTIVE = ['confirmed','checked-in'];
+function slotTaken(roomId, day, h) {
+  const s = at(day,h), e = s+H;
+  if (S.bookings.some(b => b.roomId===roomId && ACTIVE.concat('completed').includes(b.status) && b.start < e && b.end > s)) return true;
+  const n = +roomId.replace(/\D/g,'') || 1, dd = new Date(day).getDate();
+  return ((n*7 + dd*3 + h*5) % 6) === 0;  // background demand from other students
+}
+const slotPast = (day,h) => at(day,h) + 30*M < now() && isToday(day) || dayStart(day) < dayStart(now());
+const freeSlots = (roomId, day) => { let c=0; for(let h=OPEN;h<CLOSE;h++) if(!slotTaken(roomId,day,h)&&!slotPast(day,h)) c++; return c; };
+const myBookings = () => S.bookings.filter(b => b.userId === S.user.id);
+const activeSession = () => myBookings().find(b => b.status==='checked-in' && b.end > now());
+const nextBooking = () => myBookings().filter(b=>b.status==='confirmed').sort((a,b)=>a.start-b.start)[0];
+const canCheckIn = b => b.status==='confirmed' && now() >= b.start - 15*M && now() <= b.start + 15*M;
+const STATUS = {'confirmed':'Confirmed','checked-in':'Checked In','completed':'Completed','cancelled':'Cancelled','auto-cancelled':'Auto-Cancelled'};
+const pill = s => `<span class="pill st-${s}"><i></i>${STATUS[s]}</span>`;
+const eligibleOnSite = () => S.bookings.filter(b=>b.status==='checked-in').length + 4; // checked-in students + recent on-site check-ins
+
+/* status engine: anti-ghost-booking + session completion */
+function applyRules() {
+  let changed = false; const t = now();
+  S.bookings.forEach(b => {
+    if (b.status==='confirmed' && t > b.start + 15*M) { b.status='auto-cancelled'; log('System','Auto-cancelled (no check-in within 15 min)',b.ref); changed=true;
+      if (S.user && b.userId===S.user.id) toast(`${room(b.roomId).name} was auto-cancelled — no check-in within 15 minutes.`); }
+    if (b.status==='checked-in' && t >= b.end) { b.status='completed'; log('System',`Session completed · ${room(b.roomId).name}`,b.ref); changed=true; }
+  });
+  S.areas.forEach(a => { if (a.live && a.live.exp <= t) { a.live = null; changed = true; } });
+  return changed;
+}
+
+/* ---------- ui helpers ---------- */
+let toastT;
+function toast(msg){ const el=document.getElementById('toast'); el.innerHTML=`<div class="toast">${esc(msg)}</div>`; clearTimeout(toastT); toastT=setTimeout(()=>el.innerHTML='',3200); }
+function modal(html){ document.getElementById('modal').innerHTML = html ? `<div class="scrim" data-act="closeModalBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>` : ''; }
+const go = r => { if (location.hash === '#'+r) render(); else location.hash = r; };
+const countdown = ms => { ms=Math.max(0,ms); const s=Math.floor(ms/1000); return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':'); };
+
+/* =========================================================
+   STUDENT VIEWS
+   ========================================================= */
+function shell(body, tab) {
+  const t = (id, label, ic) => `<a href="#${id}" class="${tab===id?'on':''}">${ic}${label}</a>`;
+  return `<div class="app">
+    <div class="top"><a class="avatar" href="#profile" aria-label="My profile">${I.user}</a><span class="brandmini">FCSIT BookIt</span></div>
+    <main>${body}</main>
+    <nav class="tabbar">${t('home','Home',I.home)}${t('book','Book',I.cal.replace('width="22" height="22" ',''))}${t('areas','Areas',I.bars)}${t('bookings','Bookings',I.list)}${t('profile','Profile',I.user.replace('width="22" height="22" ',''))}</nav>
+  </div>`;
+}
+
+function sessionCard(b) {
+  const r = room(b.roomId), left = b.end - now(), total = b.end - b.start, ending = left <= 15*M;
+  return `<div class="session ${ending?'ending':''}" id="session">
+    <div class="row between"><span class="pill" style="color:var(--green)"><i></i>Active Session</span><span style="font-size:13px;font-weight:600">Status: Active</span></div>
+    <div style="font:800 20px var(--fd);margin-top:14px">${esc(r.name)}</div>
+    <div style="font-size:13px;opacity:.9">Level ${r.level}, Block ${r.block}</div>
+    <div class="count" data-countdown="${b.end}">${countdown(left)}</div>
+    <div style="font-size:12px;opacity:.85">Remaining time</div>
+    <div class="bar"><b data-progress="${b.start}|${b.end}" style="width:${Math.max(0,left/total*100)}%"></b></div>
+    <div class="meta"><span>Start: <b>${fT(b.start)}</b></span><span>End: <b>${fT(b.end)}</b></span></div>
+    ${ending ? `<div class="rem">⏰ Your booking session will end in 15 minutes. Please prepare to leave the room on time.</div>` : ''}
+    <div class="demo">Prototype demo: <button data-act="ff15" data-ref="${b.ref}">Jump to 15 min left</button></div>
+  </div>`;
+}
+
+function feedCard(a) {
+  const live = liveActive(a), lv = live ? a.live.level : level(areaPct(a));
+  return `<div class="feed lvl-${lv}">
+    <div class="nm"><i></i>${esc(a.name)}</div>
+    <div class="tag">${live ? `<span class="livetag">● Live report</span> from on-site students` : `<span class="est">Estimated crowd level</span>`}</div>
+    <div class="pct">*${live ? LV[lv].toUpperCase() : areaPct(a)+'% FULL'}</div>
+  </div>`;
+}
+
+function vHome() {
+  const act = activeSession(), nb = nextBooking();
+  let top = '';
+  if (act) top = sessionCard(act);
+  else if (nb) {
+    const r = room(nb.roomId), ci = canCheckIn(nb);
+    top = `<div class="card">
+      <div class="row between"><span class="hint" style="font-weight:700;letter-spacing:.06em">YOUR NEXT BOOKING</span>${pill(nb.status)}</div>
+      <div style="font:800 19px var(--fd);margin:8px 0 2px">${esc(r.name)}</div>
+      <div style="font-weight:600">${rel(nb.start)}, ${fT(nb.start)} – ${fT(nb.end)}</div>
+      <div class="hint">Level ${r.level}, Block ${r.block} · ${nb.attendees} attendees</div>
+      <div class="notice ${ci?'warn':''}" style="margin-top:12px">${I.qr}<span>Check-in: <b>Pending</b> · scan the room QR code by <b>${fT(nb.start+15*M)}</b>${isToday(nb.start)?'':' on '+fD(nb.start)}</span></div>
+      ${ci ? `<button class="btn sm" style="width:100%;margin-top:12px" data-act="checkin" data-ref="${nb.ref}">${I.qr} Scan QR to check in</button>` : ''}
+    </div>`;
+  }
+  return shell(`
+    <h1 class="title" style="margin-top:40px">FCSIT Book It</h1>
+    <p class="subtitle">Hi ${esc(S.user.name.split(' ')[0])} · ${fD(now())}</p>
+    <div class="stack">
+      ${top}
+      <a class="bluecard" href="#book" style="min-height:160px">
+        <div class="row" style="gap:10px;position:relative"><span style="background:#fff;color:var(--blue);border-radius:10px;width:40px;height:40px;display:grid;place-items:center">${I.cal}</span><span style="font:900 28px var(--fd);color:#fff">Book a Room</span></div>
+        <p class="bc-sub" style="margin-top:12px;max-width:60%">Reserve discussion pods and meeting rooms by time slot. Double-bookings are blocked automatically.</p>${SOFA}
+      </a>
+      <a class="btn outline" href="#bookings">View my bookings</a>
+    </div>
+    <div class="row between"><h2 class="section-h">Live feed</h2><a href="#areas" style="font-weight:700;font-size:14px;margin-top:18px">See all</a></div>
+    <div class="stack">${S.areas.map(feedCard).join('')}</div>
+  `, 'home');
+}
+
+function vBook() {
+  const f = S.flow;
+  const days = [...Array(7)].map((_,i)=>dayStart(now()+i*DAY));
+  return shell(`
+    <h1 class="title">Book a Room</h1>
+    <p class="subtitle">Pick a date, then choose a free pod or meeting room.</p>
+    <form data-form="search" class="stack">
+      <div><label class="label" for="bd">Date</label>
+        <select class="field" id="bd" name="day">${days.map(d=>`<option value="${d}" ${f.day==d?'selected':''}>${fD(d)}${isToday(d)?' (Today)':''}</option>`).join('')}</select></div>
+      <div><label class="label" for="bc">Capacity</label>
+        <select class="field" id="bc" name="cap">${[1,2,3,4,5,6,8,10].map(n=>`<option value="${n}" ${(f.cap||4)==n?'selected':''}>${n} ${n>1?'people':'person'}</option>`).join('')}</select></div>
+      <div><label class="label" for="bt">Room Type</label>
+        <select class="field" id="bt" name="type">${['All Types','Discussion Pod','Meeting Room'].map(n=>`<option ${f.type===n?'selected':''}>${n}</option>`).join('')}</select></div>
+      <div class="notice">${I.clock}<span>Maximum booking duration: 2 consecutive hours per booking.</span></div>
+      <button class="btn" style="margin-top:10px">Search Rooms!</button>
+    </form>
+  `, 'book');
+}
+
+function vRooms() {
+  const f = S.flow; if (!f.day) return go('book');
+  const list = S.rooms.filter(r => r.active && r.seats >= f.cap && (f.type==='All Types' || r.type===f.type));
+  const withFree = list.map(r => ({r, free:freeSlots(r.id,f.day)})).sort((a,b)=>(b.free>0)-(a.free>0));
+  const n = withFree.filter(x=>x.free>0).length;
+  return shell(`
+    <a href="#book" style="display:inline-block;margin-top:18px;font-weight:700;text-decoration:none">← Change search</a>
+    <h1 class="title" style="margin-top:14px">${n} ${n===1?'Room':'Rooms'}<br>Available</h1>
+    <p class="subtitle">${fD(f.day)} · ${f.cap}+ people · ${esc(f.type)}</p>
+    <div class="center" style="font-size:28px;margin:-10px 0 10px">↓</div>
+    <div class="stack">
+      ${withFree.length ? withFree.map(({r,free}) => `
+        <${free?'a href="#slot" data-act="pickRoom" data-id="'+r.id+'"':'div'} class="bluecard ${free?'':'grey'}" style="min-height:190px">
+          <div class="bc-title">${esc(r.name)}</div>
+          <div class="bc-big">${free ? `${r.seats} Seats Available` : '0 Slots Available'}</div>
+          <div class="tiles"><div class="tile"><small>LEVEL</small><b>${r.level}</b></div><div class="tile o"><small>BLOCK</small><b>${r.block}</b></div></div>
+          <div class="bc-sub" style="margin-top:12px">${free ? free+' free hour slot'+(free>1?'s':'')+' · ' : 'Fully booked · '}${esc(r.features)}</div>
+          ${SOFA}
+        </${free?'a':'div'}>`).join('') : `<div class="notice">No rooms match this capacity and type. Try a smaller group size or "All Types".</div>`}
+    </div>
+  `, 'book');
+}
+
+function vSlot() {
+  const f = S.flow; const r = f.roomId && room(f.roomId); if (!r) return go('book');
+  const sel = f.sel || [], days = [...Array(5)].map((_,i)=>dayStart(now()+i*DAY));
+  let slots = '';
+  for (let h=OPEN; h<CLOSE; h++) {
+    const taken = slotTaken(r.id,f.day,h), past = slotPast(f.day,h), isSel = sel.includes(h);
+    let cls='', sub='Available';
+    if (isSel) { cls='sel'; sub='Selected'; }
+    else if (past) { cls='past'; sub='Passed'; }
+    else if (taken) { cls='booked'; sub='Booked'; }
+    else if (sel.length >= 2) { cls='limit'; sub='Exceeds 2-hour limit'; }
+    else if (sel.length === 1 && Math.abs(h - sel[0]) !== 1) { cls='limit'; sub=Math.abs(h-sel[0])>1?'Exceeds 2-hour limit':'Not consecutive'; }
+    slots += `<button type="button" class="slot ${cls}" data-act="slot" data-h="${h}" aria-pressed="${isSel}"><b>${hm(h)} – ${hm(h+1)}</b><small>${sub}</small></button>`;
+  }
+  const dur = sel.length;
+  return shell(`
+    <a href="#rooms" style="display:inline-block;margin-top:18px;font-weight:700;text-decoration:none">← Back to rooms</a>
+    <h1 class="title" style="margin-top:14px">${esc(r.name)}</h1>
+    <p class="subtitle">Level ${r.level}, Block ${r.block} · ${r.seats} seats · ${esc(r.features)}</p>
+    <div class="stack">
+      <div><span class="label">1. Choose a date</span>
+        <div class="days">${days.map(d=>`<button type="button" class="day ${d==f.day?'on':''}" data-act="day" data-d="${d}"><small>${new Date(d).toLocaleDateString('en-GB',{weekday:'short'})}</small><b>${dnum(d)}</b></button>`).join('')}</div></div>
+      <div><span class="label">2. Choose time slots</span>
+        <div class="notice" style="margin-bottom:12px">${I.clock}<span>Maximum booking duration: 2 consecutive hours per booking.</span></div>
+        <div class="slots">${slots}</div>
+        <div id="slotmsg" aria-live="polite">${f.msg ? `<div class="notice bad" style="margin-top:12px">${I.info}<span>${esc(f.msg)}</span></div>` : dur===2 ? `<div class="notice good" style="margin-top:12px">${I.info}<span>You've selected the maximum of 2 consecutive hours. Other slots are disabled — tap a selected slot to change your time.</span></div>` : ''}</div>
+      </div>
+      <div><span class="label">3. Booking details</span>
+        <div class="stack">
+          <input class="field" data-bind="purpose" placeholder="Purpose (e.g. Group assignment discussion)" value="${esc(f.purpose||'')}" aria-label="Purpose">
+          <select class="field" data-bind="att" aria-label="Attendees">${[...Array(r.seats)].map((_,i)=>`<option value="${i+1}" ${(+f.att||Math.min(f.cap||4,r.seats))===i+1?'selected':''}>${i+1} ${i?'people':'person'}</option>`).join('')}</select>
+        </div></div>
+      <button class="btn" data-act="toLayout" ${dur?'':'disabled'}>${dur ? `Continue · ${hm(sel[0])} – ${hm(sel[dur-1]+1)} (${dur} h${dur>1?'rs':''})` : 'Select at least one slot'}</button>
+    </div>
+  `, 'book');
+}
+
+function vLayout() {
+  const f = S.flow; const r = f.roomId && room(f.roomId); if (!r || !(f.sel||[]).length) return go('book');
+  const zones = ['Table 1','Table 2','Corner Booth','Table 3'];
+  const blocked = 2; // demo: one area under maintenance
+  return shell(`
+    <a href="#slot" style="display:inline-block;margin-top:18px;font-weight:700;text-decoration:none">← Back to time slots</a>
+    <h1 class="title" style="margin-top:14px">${esc(r.name.replace('Discussion ',''))} Layout</h1>
+    <p class="subtitle">Select your desired area</p>
+    <div class="layout">
+      ${zones.map((z,i)=> i===blocked ? `<div class="zone x" title="Unavailable">${I.no}</div>` : `<button class="zone ${f.zone===z?'on':''}" data-act="zone" data-z="${z}">${f.zone===z?'Selected':'Select'}<div style="font:600 12px Inter;margin-top:4px;opacity:.8">${z}</div></button>`).join('')}
+      <div class="entrance"><i></i><span>ENTRANCE</span></div>
+    </div>
+    <p class="hint center" style="margin:12px 0 22px">Grey areas are unavailable. Area choice is optional.</p>
+    <button class="btn" data-act="toSummary">Proceed</button>
+  `, 'book');
+}
+
+function vSummary() {
+  const f = S.flow; const r = f.roomId && room(f.roomId); if (!r || !(f.sel||[]).length) return go('book');
+  const st = at(f.day, f.sel[0]), en = at(f.day, f.sel[f.sel.length-1]+1);
+  return shell(`
+    <a href="#${r.type==='Discussion Pod'?'layout':'slot'}" style="display:inline-block;margin-top:18px;font-weight:700;text-decoration:none">← Back</a>
+    <h1 class="title" style="margin-top:14px">Summary</h1>
+    <p class="subtitle">Booking details — review before confirming</p>
+    <div class="stack">
+      <div class="card">
+        <div class="kv"><span>Room</span><span>${esc(r.name)}</span></div>
+        <div class="kv"><span>Date</span><span>${fD(st)}</span></div>
+        <div class="kv"><span>Time</span><span>${fT(st)} – ${fT(en)}</span></div>
+        <div class="kv"><span>Duration</span><span>${f.sel.length} hour${f.sel.length>1?'s':''}</span></div>
+        <div class="kv"><span>Location</span><span>Level ${r.level}, Block ${r.block}</span></div>
+        ${f.zone?`<div class="kv"><span>Area</span><span>${esc(f.zone)}</span></div>`:''}
+        <div class="kv"><span>Attendees</span><span>${+f.att||Math.min(f.cap||4,r.seats)} people</span></div>
+        <div class="kv"><span>Purpose</span><span>${esc(f.purpose||'Group discussion')}</span></div>
+      </div>
+      <div class="req">
+        <h3>${I.qr} Check-in Requirement</h3>
+        <p>Students must scan the QR code displayed at the room entrance within 15 minutes after their booking starts. Failure to check in within the permitted period will result in automatic booking cancellation.</p>
+        <div class="req-items">
+          <div class="req-item">${I.qr}<div>QR Code Check-in Required<small>Scan the code posted at the ${esc(r.name)} entrance</small></div></div>
+          <div class="req-item">${I.clock}<div>15-Minute Grace Period<small>Check in between ${fT(st)} and ${fT(st+15*M)}</small></div></div>
+          <div class="req-item">${I.xc}<div>Automatic Cancellation Policy<small>No check-in by ${fT(st+15*M)} → booking is auto-cancelled</small></div></div>
+        </div>
+      </div>
+      <p class="hint center" style="margin:4px 10px">These slots are held for you once you confirm, so nobody else can double-book them.</p>
+      <button class="btn" data-act="confirm">Confirm Booking</button>
+      <a class="btn ghost" href="#book" data-act="resetFlow">Cancel</a>
+    </div>
+  `, 'book');
+}
+
+function vConfirmed() {
+  const b = S.bookings.find(x => x.ref === S.flow.lastRef); if (!b) return go('home');
+  const r = room(b.roomId);
+  return shell(`
+    <div style="width:88px;height:88px;border-radius:50%;background:var(--lav);color:var(--blue);display:grid;place-items:center;margin:40px auto 0">${I.check.replace('<svg','<svg width="44" height="44"')}</div>
+    <h1 class="title" style="margin-top:20px">Booking<br>Confirmed</h1>
+    <p class="subtitle">Your slot is reserved. See you at ${esc(r.name)}.</p>
+    <div class="stack">
+      <div class="card">
+        <div class="kv"><span>Booking Reference</span><span>${b.ref}</span></div>
+        <div class="kv"><span>Room Name</span><span>${esc(r.name)}</span></div>
+        <div class="kv"><span>Booking Date</span><span>${fD(b.start)}</span></div>
+        <div class="kv"><span>Booking Time</span><span>${fT(b.start)} – ${fT(b.end)}</span></div>
+        <div class="kv"><span>Check-in Status</span><span><span class="pill st-auto-cancelled"><i></i>Pending</span></span></div>
+        <div class="kv"><span>Check-in Deadline</span><span style="color:var(--amber)">${fDT(b.start+15*M)}</span></div>
+      </div>
+      <div class="notice warn">${I.qr}<span>Please remember to check in by scanning the QR code at the room entrance within 15 minutes after your booking starts.</span></div>
+      <a class="btn outline" href="#bookings" style="margin-top:8px">View my Bookings</a>
+      <a class="btn" href="#home">Back to Home</a>
+    </div>
+  `, 'book');
+}
+
+function areaCard(a) {
+  const p = areaPct(a), live = liveActive(a), lv = live ? a.live.level : level(p);
+  return `<div class="area lvl-${lv}">
+    <div class="row between" style="align-items:flex-start">
+      <div><div style="font:800 18px var(--fd)">${esc(a.name)}</div><div class="hint">${esc(a.loc)}</div></div>
+      <span class="badge"><i></i>${LV[lv]}</span>
+    </div>
+    ${live ? `
+      <div style="margin-top:14px" class="row"><span class="pct" style="font-size:34px">${LV[lv]}</span></div>
+      <div style="margin-top:10px" class="row"><span class="livetag">● Live report</span><span class="hint">${a.live.n} on-site responses · ${a.live.votes}</span></div>
+      <div class="hint" style="margin-top:8px">Reported ${ago(a.live.t)} · shown until ${fT(a.live.exp)} (30 min)</div>`
+    : `
+      <div class="row" style="margin-top:14px;align-items:baseline;gap:6px"><span class="pct">${p}%</span><span class="hint">full</span></div>
+      <div class="track"><b style="width:${p}%"></b></div>
+      <div class="row between"><span class="est">${I.info.replace('width="18" height="18"','width="12" height="12"')} Estimated crowd level</span><span class="hint">Updated ${ago(a.upd)}</span></div>`}
+  </div>`;
+}
+
+function vAreas() {
+  return shell(`
+    <h1 class="title">Common Areas</h1>
+    <p class="subtitle">Check how busy a space is before you walk across buildings.</p>
+    <div class="legend"><span class="badge lvl-quiet"><i></i>Quiet &lt;40%</span><span class="badge lvl-moderate"><i></i>Moderate 40–70%</span><span class="badge lvl-busy"><i></i>Busy &gt;70%</span></div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="font:800 18px var(--fd);margin-bottom:4px">Need a fresher reading?</div>
+      <p style="margin:0 0 12px;font-size:14px;color:#1d2340">Request a live crowd update from students currently checked in at FCSIT.</p>
+      <button class="btn sm" style="width:100%" data-act="reqLive">${I.bell} Request Live Status</button>
+      <p class="hint" style="margin:10px 0 0">Crowd levels are <b>estimates</b> from bookings and student reports — the system does not perform an exact physical headcount.</p>
+    </div>
+    <div class="stack">${S.areas.map(areaCard).join('')}</div>
+  `, 'areas');
+}
+
+function bookingCard(b) {
+  const r = room(b.roomId), past = !ACTIVE.includes(b.status), ci = canCheckIn(b);
+  return `<div class="bluecard ${past?'grey':''}" style="min-height:200px;cursor:default">
+    ${pill(b.status)}
+    <div class="bc-title">${esc(r.name)}</div>
+    <div class="bc-big" style="font-size:22px">${fT(b.start).replace(' ','')} - ${fT(b.end).replace(' ','')}</div>
+    <div class="tiles"><div class="tile"><small>${mon(b.start)}</small><b>${dnum(b.start)}</b></div><div class="tile o" style="${past?'border-color:#8a8d9c;color:#6b6f84':''}"><small>PEOPLE</small><b>${b.attendees}</b></div></div>
+    <div class="bc-sub" style="margin-top:10px">${b.ref} · Level ${r.level}, Block ${r.block}${b.status==='confirmed'?` · Check in by ${fT(b.start+15*M)}`:''}${b.status==='auto-cancelled'?' · No check-in within 15 min':''}</div>
+    ${b.status==='confirmed' ? `<div class="row" style="position:relative;margin-top:14px;gap:8px;z-index:1">
+        ${ci ? `<button class="btn sm white" data-act="checkin" data-ref="${b.ref}">${I.qr} Check in</button>` : ''}
+        <button class="btn sm white" style="color:var(--red)" data-act="cancelAsk" data-ref="${b.ref}">Cancel Booking</button></div>` : ''}
+    ${b.status==='checked-in' ? `<div style="position:relative;margin-top:14px;z-index:1"><a class="btn sm white" href="#home">View active session</a></div>` : ''}
+    ${SOFA}
+  </div>`;
+}
+
+function vBookings() {
+  const mine = myBookings();
+  const up = mine.filter(b => ACTIVE.includes(b.status)).sort((a,b)=>a.start-b.start);
+  const past = mine.filter(b => !ACTIVE.includes(b.status)).sort((a,b)=>b.start-a.start);
+  const list = S.tab==='upcoming' ? up : past;
+  return shell(`
+    <h1 class="title">My Bookings</h1>
+    <p class="subtitle">Manage your upcoming and past room reservations.</p>
+    <div class="seg"><button class="${S.tab==='upcoming'?'on':''}" data-act="tab" data-t="upcoming">Upcoming (${up.length})</button><button class="${S.tab==='past'?'on':''}" data-act="tab" data-t="past">Past (${past.length})</button></div>
+    <div class="legend">${Object.keys(STATUS).map(pill).join('')}</div>
+    <div class="stack">${list.length ? list.map(bookingCard).join('') : `<div class="notice">No ${S.tab} bookings. <a href="#book">Book a room</a></div>`}</div>
+  `, 'bookings');
+}
+
+function vProfile() {
+  const u = S.user, e = S.editProfile;
+  const ro = e ? '' : 'readonly';
+  return shell(`
+    <h1 class="title">My Profile</h1>
+    <p class="subtitle">${esc(u.matric)} · Student</p>
+    <form data-form="profile" class="stack">
+      <h2 class="section-h" style="margin:0">Personal Information</h2>
+      <div><label class="label" for="pn">Full Name</label><input class="field" id="pn" name="name" value="${esc(u.name)}" ${ro} required></div>
+      <div><label class="label" for="pm">Matric Number</label><input class="field" id="pm" name="matric" value="${esc(u.matric)}" ${ro} required></div>
+      <div><label class="label" for="pe">Email Address</label><input class="field" id="pe" name="email" type="email" value="${esc(u.email)}" ${ro} required></div>
+      <h2 class="section-h" style="margin:10px 0 0">Study Preferences</h2>
+      <div><label class="label" for="pa">Preferred Study Area</label>
+        <select class="field" id="pa" name="area" ${e?'':'disabled'}>${AREAS_LIST.map(a=>`<option ${u.area===a?'selected':''}>${a}</option>`).join('')}</select></div>
+      <div><span class="label">Usual Free Time</span>
+        <div class="chips">${FREE_TIMES.map(t=>`<button type="button" class="chip ${(e?S.draftFree:u.free).includes(t)?'on':''}" ${e?`data-act="freeChip" data-v="${t}"`:'disabled'}>${t}</button>`).join('')}</div></div>
+      <div id="perr"></div>
+      ${e ? `<div class="row" style="gap:10px;margin-top:8px"><button type="button" class="btn outline" data-act="profCancel">Cancel</button><button class="btn">Save Changes</button></div>`
+          : `<button type="button" class="btn" data-act="profEdit" style="margin-top:8px">Edit Profile</button>`}
+    </form>
+    <button class="btn ghost" data-act="logout" style="margin-top:10px">${I.out} Log out</button>
+  `, 'profile');
+}
+
+/* ---------- auth ---------- */
+function vLogin() {
+  const admin = S.flow.adminLogin;
+  return `<div class="auth">
+    <div class="logo">F</div>
+    <h1 class="title" style="margin-top:18px">FCSIT Book It</h1>
+    <p class="subtitle">${admin ? 'Administrator sign-in' : 'Log in to book rooms and check common areas'}</p>
+    <form data-form="login" class="stack">
+      <div><label class="label" for="li">${admin?'Admin Email':'Matric Number or Email Address'}</label><input class="field" id="li" name="id" autocomplete="username" value="${esc(S.flow.prefill||'')}" placeholder="${admin?'admin@fsktm.um.edu.my':'e.g. U2100123'}" required></div>
+      <div><label class="label" for="lp">Password</label><input class="field" id="lp" name="pw" type="password" autocomplete="current-password" required></div>
+      <div id="lerr">${S.flow.okMsg?`<div class="notice good">${esc(S.flow.okMsg)}</div>`:''}</div>
+      <button class="btn" style="margin-top:8px">Login</button>
+    </form>
+    ${admin ? '' : `<p class="center" style="margin-top:20px">New to BookIt? <a href="#register" style="font-weight:700">Create a student account</a></p>`}
+    <div class="notice" style="margin-top:22px">${I.info}<span>Prototype demo accounts —<br>${admin ? 'Admin: <b>admin@fsktm.um.edu.my</b> / <b>admin123</b>' : 'Student: <b>U2100123</b> / <b>bookit123</b>'}</span></div>
+    <p class="center" style="margin-top:18px"><a href="#" data-act="toggleAdmin" style="font-weight:600;font-size:14px">${admin?'← Student login':'Faculty administrator? Log in here'}</a></p>
+  </div>`;
+}
+
+function vRegister() {
+  const r = S.flow.reg || {free:[]};
+  return `<div class="auth">
+    <a href="#login" style="font-weight:700;text-decoration:none">← Back to login</a>
+    <h1 class="title" style="margin-top:20px">Student<br>Registration</h1>
+    <p class="subtitle">First time here? Set up your BookIt account.</p>
+    <form data-form="register" class="stack" novalidate>
+      <div><label class="label" for="rn">Full Name</label><input class="field" id="rn" name="name" value="${esc(r.name||'')}" required></div>
+      <div><label class="label" for="rm">Matric Number</label><input class="field" id="rm" name="matric" value="${esc(r.matric||'')}" placeholder="e.g. U2100999" required></div>
+      <div><label class="label" for="re">Email Address</label><input class="field" id="re" name="email" type="email" value="${esc(r.email||'')}" placeholder="you@siswa.um.edu.my" required></div>
+      <div><label class="label" for="rp">Password</label><input class="field" id="rp" name="pw" type="password" placeholder="At least 6 characters" required></div>
+      <div><label class="label" for="rc">Confirm Password</label><input class="field" id="rc" name="pw2" type="password" required></div>
+      <div><label class="label" for="ra">Preferred Study Area</label>
+        <select class="field" id="ra" name="area">${AREAS_LIST.map(a=>`<option ${r.area===a?'selected':''}>${a}</option>`).join('')}</select></div>
+      <div><span class="label">Usual Free Time <span class="hint" style="font-family:Inter;font-weight:500">(pick any)</span></span>
+        <div class="chips">${FREE_TIMES.map(t=>`<button type="button" class="chip ${r.free.includes(t)?'on':''}" data-act="regChip" data-v="${t}">${t}</button>`).join('')}</div></div>
+      <div id="rerr"></div>
+      <button class="btn" style="margin-top:8px">Register</button>
+    </form>
+    <p class="center" style="margin-top:20px">Already have an account? <a href="#login" style="font-weight:700">Log in</a></p>
+  </div>`;
+}
+
+/* =========================================================
+   ADMIN VIEWS
+   ========================================================= */
+const ANAV = [['admin','Dashboard',I.grid],['admin-users','Manage Users',I.users],['admin-rooms','Manage Rooms',I.door],['admin-bookings','Manage Bookings',I.book],['admin-logs','Reservation Logs',I.log],['admin-areas','Manage Common Areas',I.bars.replace('<svg','<svg width="20" height="20"')]];
+function ashell(route, title, sub, body, action='') {
+  const nav = ANAV.map(([id,l,ic])=>`<a href="#${id}" class="${route===id?'on':''}">${ic}${l}</a>`).join('');
+  return `<div class="admin">
+    <aside class="side"><div class="brand"><b>F</b><div>FCSIT BookIt<small>Administrator</small></div></div>${nav}
+      <a href="#" class="out" data-act="logout">${I.out}Log out</a></aside>
+    <div style="min-width:0">
+      <div class="atop"><div class="brand"><span>FCSIT BookIt · Admin</span><a href="#" data-act="logout" style="color:#fff;font:600 13px Inter">Log out</a></div><nav>${ANAV.map(([id,l])=>`<a href="#${id}" class="${route===id?'on':''}">${l}</a>`).join('')}</nav></div>
+      <div class="amain"><div class="ah"><div><h1>${title}</h1><p>${sub}</p></div>${action}</div>${body}</div>
+    </div></div>`;
+}
+const studentName = id => esc(userById(id)?.name || '—');
+
+function vAdmin() {
+  const t = now(), B = S.bookings;
+  const upcoming = B.filter(b=>b.status==='confirmed'&&b.start>t).length;
+  const today = B.filter(b=>isToday(b.start)&&ACTIVE.concat('completed').includes(b.status)).length;
+  const counts = Object.keys(STATUS).map(s=>[s,B.filter(b=>b.status===s).length]);
+  return ashell('admin','Admin Dashboard',`Faculty facilities overview · ${fD(t)}`, `
+    <div class="stats">
+      <div class="stat hero"><small>Total Discussion Rooms</small><b>${S.rooms.filter(r=>r.active).length}</b><small>${S.rooms.filter(r=>!r.active).length} inactive</small></div>
+      <div class="stat"><small>Total Reservations</small><b>${B.length}</b><small class="hint">all time</small></div>
+      <div class="stat"><small>Upcoming Reservations</small><b>${upcoming}</b><small class="hint">confirmed, not started</small></div>
+      <div class="stat"><small>Rooms in use today</small><b>${today}</b><small class="hint">${B.filter(b=>b.status==='checked-in').length} checked in now</small></div>
+    </div>
+    <div class="qnav">${ANAV.slice(1).map(([id,l,ic])=>`<a href="#${id}">${ic}${l}</a>`).join('')}</div>
+    <div class="grid2" style="grid-template-columns:1.4fr 1fr">
+      <div class="panel"><div class="row between"><h3>Recent Booking Activities</h3><a href="#admin-logs" style="font-weight:600;font-size:13px">View all logs</a></div>
+        ${S.logs.slice(0,7).map(l=>`<div class="act"><span class="dot">${l.actor==='System'?I.clock.replace('22','18').replace('22','18'):I.book.replace('20','18').replace('20','18')}</span><div><b>${esc(l.actor)}</b> · ${esc(l.action)}<div class="hint">${l.ref} · ${ago(l.t)}</div></div></div>`).join('')}
+      </div>
+      <div class="panel"><h3>Bookings by status</h3>
+        ${counts.map(([s,n])=>`<div class="row between" style="padding:8px 0">${pill(s)}<b>${n}</b></div><div style="height:6px;background:#F1F2F5;border-radius:6px;overflow:hidden"><div class="st-${s}" style="height:100%;width:${n/B.length*100}%;background:currentColor"></div></div>`).join('')}
+      </div>
+    </div>
+  `);
+}
+
+function vAdminRooms() {
+  return ashell('admin-rooms','Manage Rooms','Add, edit or remove discussion rooms and check availability.', `
+    <div class="panel tw"><table>
+      <thead><tr><th>Room</th><th>Type</th><th>Location</th><th>Seats</th><th>Facilities</th><th>Today's availability</th><th>Status</th><th></th></tr></thead>
+      <tbody>${S.rooms.map(r=>{ const f=freeSlots(r.id,now()); return `<tr>
+        <td><b>${esc(r.name)}</b></td><td>${esc(r.type)}</td><td>Level ${r.level}, Block ${esc(r.block)}</td><td>${r.seats}</td><td class="hint">${esc(r.features)}</td>
+        <td><button class="ib" data-act="avail" data-id="${r.id}">${r.active?`${f} free slot${f===1?'':'s'}`:'—'} · View</button></td>
+        <td>${r.active?'<span class="pill st-checked-in"><i></i>Active</span>':'<span class="pill st-completed"><i></i>Inactive</span>'}</td>
+        <td style="white-space:nowrap"><button class="ib" data-act="roomForm" data-id="${r.id}">Edit</button> <button class="ib r" data-act="roomDelAsk" data-id="${r.id}">Remove</button></td></tr>`;}).join('')}</tbody>
+    </table></div>`, `<button class="btn sm" data-act="roomForm">+ Add new room</button>`);
+}
+
+function vAdminBookings() {
+  const f = S.adminFilter;
+  const list = S.bookings.filter(b=>f==='all'||b.status===f).sort((a,b)=>b.start-a.start);
+  return ashell('admin-bookings','Manage Bookings','View all student reservations and monitor their status.', `
+    <div class="filters">${['all',...Object.keys(STATUS)].map(s=>`<button class="chip ${f===s?'on':''}" data-act="afilter" data-s="${s}">${s==='all'?'All':STATUS[s]} (${s==='all'?S.bookings.length:S.bookings.filter(b=>b.status===s).length})</button>`).join('')}</div>
+    <div class="panel tw"><table>
+      <thead><tr><th>Reference</th><th>Student</th><th>Room</th><th>Date & time</th><th>Attendees</th><th>Status</th><th></th></tr></thead>
+      <tbody>${list.map(b=>`<tr><td><b>${b.ref}</b></td><td>${studentName(b.userId)}</td><td>${esc(room(b.roomId)?.name||'(removed room)')}</td>
+        <td>${fD(b.start)}<div class="hint">${fT(b.start)} – ${fT(b.end)}</div></td><td>${b.attendees}</td><td>${pill(b.status)}</td>
+        <td><button class="ib" data-act="bookDetail" data-ref="${b.ref}">Details</button></td></tr>`).join('') || '<tr><td colspan="7" class="hint">No bookings with this status.</td></tr>'}</tbody>
+    </table></div>`);
+}
+
+function vAdminLogs() {
+  const q = S.logQ.toLowerCase();
+  const list = S.logs.filter(l=>!q||`${l.actor} ${l.action} ${l.ref}`.toLowerCase().includes(q));
+  return ashell('admin-logs','Reservation Logs','Historical reservation records and room usage activity.', `
+    <div style="max-width:360px;margin-bottom:14px"><input class="mini" data-bind="logQ" placeholder="Search by student, room or reference…" value="${esc(S.logQ)}"></div>
+    <div class="panel tw"><table>
+      <thead><tr><th>Date & time</th><th>Actor</th><th>Activity</th><th>Reference</th></tr></thead>
+      <tbody>${list.map(l=>`<tr><td style="white-space:nowrap">${fDT(l.t)}</td><td><b>${esc(l.actor)}</b></td><td>${esc(l.action)}</td><td class="hint">${l.ref}</td></tr>`).join('') || '<tr><td colspan="4" class="hint">No matching records.</td></tr>'}</tbody>
+    </table></div>`);
+}
+
+function vAdminUsers() {
+  const st = S.users.filter(u=>u.role==='student');
+  return ashell('admin-users','Manage Users','Registered students and their study preferences.', `
+    <div class="panel tw"><table>
+      <thead><tr><th>Name</th><th>Matric no.</th><th>Email</th><th>Preferred area</th><th>Usual free time</th><th>Bookings</th></tr></thead>
+      <tbody>${st.map(u=>`<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.matric)}</td><td>${esc(u.email)}</td><td>${esc(u.area)}</td><td class="hint">${esc((u.free||[]).join(', ')||'—')}</td><td>${S.bookings.filter(b=>b.userId===u.id).length}</td></tr>`).join('')}</tbody>
+    </table></div>`);
+}
+
+function vAdminAreas() {
+  return ashell('admin-areas','Manage Common Areas','Baseline capacity and estimated occupancy used by the Common Area Status module.', `
+    <div class="panel tw"><table>
+      <thead><tr><th>Area</th><th>Location</th><th>Capacity</th><th>Estimated occupancy</th><th>Shown to students</th><th>Students preferring</th><th></th></tr></thead>
+      <tbody>${S.areas.map(a=>{const p=areaPct(a),lv=liveActive(a)?a.live.level:level(p);return `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.loc)}</td><td>${a.cap}</td><td>${a.taken} seats (${p}%)</td>
+        <td><span class="badge lvl-${lv}"><i></i>${LV[lv]}${liveActive(a)?' · live':''}</span></td><td>${S.users.filter(u=>u.area===a.name).length}</td>
+        <td><button class="ib" data-act="areaForm" data-id="${a.id}">Edit</button></td></tr>`;}).join('')}</tbody>
+    </table></div>`);
+}
+
+/* =========================================================
+   ROUTER
+   ========================================================= */
+const STUDENT = {home:vHome,book:vBook,rooms:vRooms,slot:vSlot,layout:vLayout,summary:vSummary,confirmed:vConfirmed,areas:vAreas,bookings:vBookings,profile:vProfile};
+const ADMIN = {'admin':vAdmin,'admin-rooms':vAdminRooms,'admin-bookings':vAdminBookings,'admin-logs':vAdminLogs,'admin-users':vAdminUsers,'admin-areas':vAdminAreas};
+function render() {
+  applyRules();
+  let r = location.hash.slice(1);
+  if (!S.user) { if (r !== 'register') r = 'login'; }
+  else if (S.user.role === 'admin') { if (!ADMIN[r]) r = 'admin'; }
+  else if (!STUDENT[r]) r = 'home';
+  if ('#'+r !== location.hash) { history.replaceState(null,'','#'+r); }
+  S.route = r;
+  const v = r==='login'?vLogin : r==='register'?vRegister : (ADMIN[r]||STUDENT[r]);
+  const html = v();
+  if (typeof html === 'string') { document.getElementById('root').innerHTML = html; }
+  window.scrollTo(0, S.keepScroll ? S.keepScroll : 0); S.keepScroll = 0;
+}
+const rerender = () => { S.keepScroll = window.scrollY; render(); };
+window.addEventListener('hashchange', render);
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+const A = {
+  closeModalBg(d, el, e){ if (e.target === el) modal(''); },
+  close(){ modal(''); },
+  toggleAdmin(d,el,e){ e.preventDefault(); S.flow.adminLogin = !S.flow.adminLogin; S.flow.okMsg=''; S.flow.prefill=''; render(); },
+  logout(d,el,e){ e.preventDefault(); S.user=null; S.flow={}; S.editProfile=false; go('login'); },
+  regChip(d,el){ const r = S.flow.reg = S.flow.reg || {free:[]}; r.free = r.free.includes(d.v) ? r.free.filter(x=>x!==d.v) : [...r.free,d.v]; el.classList.toggle('on'); },
+  freeChip(d,el){ const f=S.draftFree; S.draftFree = f.includes(d.v)?f.filter(x=>x!==d.v):[...f,d.v]; el.classList.toggle('on'); },
+  profEdit(){ S.editProfile=true; S.draftFree=[...S.user.free]; rerender(); },
+  profCancel(){ S.editProfile=false; rerender(); },
+  pickRoom(d){ Object.assign(S.flow,{roomId:d.id,sel:[],msg:'',zone:null}); },
+  day(d){ S.flow.day=+d.d; S.flow.sel=[]; S.flow.msg=''; rerender(); },
+  slot(d){
+    const f=S.flow, h=+d.h, sel=f.sel||[]; f.msg='';
+    if (sel.includes(h)) { f.sel = sel.length===2 ? sel.filter(x=>x!==h) : []; }
+    else if (slotPast(f.day,h)) { f.msg='This time has already passed.'; }
+    else if (slotTaken(f.roomId,f.day,h)) { f.msg='This slot is already booked by someone else.'; }
+    else if (sel.length===0) f.sel=[h];
+    else if (sel.length===1 && Math.abs(h-sel[0])===1) f.sel=[...sel,h].sort((a,b)=>a-b);
+    else if (sel.length>=2) f.msg='Selection exceeds the permitted limit: maximum booking duration is 2 consecutive hours. Tap a selected slot to change your time.';
+    else f.msg = Math.abs(h-sel[0])>1 ? 'Selection exceeds the 2-hour limit — slots must be next to each other, up to 2 consecutive hours.' : 'Slots must be consecutive.';
+    rerender();
+  },
+  toLayout(){ const r=room(S.flow.roomId); go(r.type==='Discussion Pod'?'layout':'summary'); },
+  zone(d){ S.flow.zone = S.flow.zone===d.z?null:d.z; rerender(); },
+  toSummary(){ go('summary'); },
+  resetFlow(){ S.flow = {day:S.flow.day,cap:S.flow.cap,type:S.flow.type}; },
+  confirm(){
+    const f=S.flow, r=room(f.roomId), st=at(f.day,f.sel[0]), en=at(f.day,f.sel[f.sel.length-1]+1);
+    if (f.sel.some(h=>slotTaken(r.id,f.day,h))) { toast('Sorry — one of those slots was just booked. Please pick again.'); return go('slot'); }
+    const b = mkBooking(S.user.id, r.id, st, en, 'confirmed', {att:+f.att||Math.min(f.cap||4,r.seats), purpose:f.purpose, created:now(), zone:f.zone});
+    log(S.user.name.split(' ')[0], `Booked ${r.name}`, b.ref);
+    S.flow = {day:f.day,cap:f.cap,type:f.type,lastRef:b.ref}; go('confirmed');
+  },
+  tab(d){ S.tab=d.t; rerender(); },
+  checkin(d){
+    const b = S.bookings.find(x=>x.ref===d.ref), r = room(b.roomId);
+    modal(`<h2>Scan room QR code</h2><p class="hint">Point your camera at the QR code posted at the ${esc(r.name)} entrance. Deadline: <b>${fT(b.start+15*M)}</b>.</p>
+      ${QR}<div class="notice" style="margin-bottom:14px">${I.info}<span>Prototype: camera scanning isn't available here, so tap below to simulate a successful scan.</span></div>
+      <button class="btn" data-act="doCheckin" data-ref="${b.ref}">Simulate QR scan</button><button class="btn ghost" data-act="close">Cancel</button>`);
+  },
+  doCheckin(d){
+    const b = S.bookings.find(x=>x.ref===d.ref);
+    if (!canCheckIn(b)) { modal(''); toast('Check-in window has closed.'); return render(); }
+    b.status='checked-in'; b.checkedAt=now(); log(S.user.name.split(' ')[0], `Checked in to ${room(b.roomId).name}`, b.ref);
+    modal(''); toast('Checked in! Your session is now active.'); go('home');
+  },
+  ff15(d){ const b=S.bookings.find(x=>x.ref===d.ref); const shift = b.end - (now()+15*M - 1000); b.start-=shift; b.end-=shift; rerender(); },
+  cancelAsk(d){
+    const b=S.bookings.find(x=>x.ref===d.ref), r=room(b.roomId);
+    modal(`<h2>Cancel this booking?</h2><p>${esc(r.name)} · ${fD(b.start)}, ${fT(b.start)} – ${fT(b.end)}</p><p class="hint">The slot will be released for other students. This cannot be undone.</p>
+      <div class="stack" style="margin-top:16px"><button class="btn danger" data-act="doCancel" data-ref="${b.ref}">Yes, cancel booking</button><button class="btn outline" data-act="close">Keep booking</button></div>`);
+  },
+  doCancel(d){
+    const b=S.bookings.find(x=>x.ref===d.ref); b.status='cancelled';
+    log(S.user.role==='admin'?'Admin':S.user.name.split(' ')[0], `Cancelled ${room(b.roomId)?.name||''}`, b.ref);
+    modal(''); toast('Booking cancelled.'); rerender();
+  },
+  reqLive(){
+    modal(`<h2>Request Live Status</h2><p class="hint">We'll ask <b>${eligibleOnSite()} students currently checked in at FCSIT</b> to report how crowded an area is. Responses update the status for up to 30 minutes.</p>
+      <label class="flabel" for="la" style="margin-top:14px">Which area?</label>
+      <select class="mini" id="la">${S.areas.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select>
+      <div class="stack" style="margin-top:18px"><button class="btn" data-act="sendLive">${I.bell} Send request</button><button class="btn ghost" data-act="close">Cancel</button></div>`);
+  },
+  sendLive(){
+    const a = S.areas.find(x=>x.id===document.getElementById('la').value);
+    modal(`<div class="notice good" style="margin-bottom:16px">${I.check.replace('<svg','<svg width="18" height="18"')}<span>Request sent to ${eligibleOnSite()} eligible on-site students.</span></div>
+      <p class="hint" style="margin:0 0 10px">This is the notification they receive — <b>tap an answer to simulate their replies</b>:</p>
+      <div class="notif"><div class="app-n"><b>F</b>FCSIT BookIt · now</div>
+        <div style="font-weight:700">How busy is the ${esc(a.name)} right now?</div>
+        <div class="hint">A student nearby asked for a live update. Your answer is anonymous.</div>
+        <div class="three">
+          <button class="lvl-empty" data-act="liveAns" data-id="${a.id}" data-v="empty">Empty</button>
+          <button class="lvl-moderate" data-act="liveAns" data-id="${a.id}" data-v="moderate">Moderate</button>
+          <button class="lvl-packed" data-act="liveAns" data-id="${a.id}" data-v="packed">Packed</button>
+        </div></div>
+      <button class="btn ghost" data-act="close" style="margin-top:10px">Close</button>`);
+  },
+  liveAns(d){
+    const a = S.areas.find(x=>x.id===d.id), opts=['empty','moderate','packed'], i=opts.indexOf(d.v);
+    // simulated: your tap + 2 more on-site replies clustered around it
+    const votes=[d.v, d.v, opts[Math.max(0,Math.min(2,i+(Math.random()<.5?-1:1)))]];
+    const tally = opts.map(o=>[o,votes.filter(v=>v===o).length]).filter(x=>x[1]);
+    const lv = tally.sort((x,y)=>y[1]-x[1])[0][0];
+    a.live = {level:lv, n:votes.length, votes:tally.map(([o,n])=>`${n} ${LV[o]}`).join(', '), t:now(), exp:now()+30*M};
+    modal(''); toast(`${a.name} updated: ${LV[lv]} (live, ${votes.length} responses).`); rerender();
+  },
+  /* admin */
+  afilter(d){ S.adminFilter=d.s; rerender(); },
+  bookDetail(d){
+    const b=S.bookings.find(x=>x.ref===d.ref), r=room(b.roomId), u=userById(b.userId);
+    modal(`<div class="row between"><h2>${b.ref}</h2>${pill(b.status)}</div>
+      <div class="kv"><span>Student</span><span>${esc(u.name)} (${esc(u.matric)})</span></div>
+      <div class="kv"><span>Room</span><span>${esc(r?.name||'(removed)')}</span></div>
+      <div class="kv"><span>Date</span><span>${fD(b.start)}</span></div>
+      <div class="kv"><span>Time</span><span>${fT(b.start)} – ${fT(b.end)}</span></div>
+      <div class="kv"><span>Attendees</span><span>${b.attendees}</span></div>
+      <div class="kv"><span>Purpose</span><span>${esc(b.purpose)}</span></div>
+      <div class="kv"><span>Check-in deadline</span><span>${fT(b.start+15*M)}</span></div>
+      <div class="stack" style="margin-top:16px">${b.status==='confirmed'?`<button class="btn danger" data-act="doCancel" data-ref="${b.ref}">Cancel this booking</button>`:''}<button class="btn outline" data-act="close">Close</button></div>`);
+  },
+  avail(d){
+    const r=room(d.id); const days=[0,1,2].map(i=>dayStart(now()+i*DAY));
+    modal(`<h2>${esc(r.name)} availability</h2><p class="hint">Green = free · red = booked</p>${days.map(dd=>`<div style="font-weight:700;margin:14px 0 8px">${fD(dd)}</div><div class="mslots">${[...Array(CLOSE-OPEN)].map((_,i)=>{const h=OPEN+i;return `<div class="${slotTaken(r.id,dd,h)?'b':''}">${hm(h).replace(':00','')}</div>`}).join('')}</div>`).join('')}
+      <button class="btn outline" data-act="close" style="margin-top:18px">Close</button>`);
+  },
+  roomForm(d){
+    const r = d.id ? room(d.id) : {name:'',type:'Discussion Pod',level:1,block:'A',seats:4,features:'',active:true};
+    modal(`<h2>${d.id?'Edit room':'Add new room'}</h2>
+      <form data-form="room" data-id="${d.id||''}" class="stack" style="margin-top:12px">
+        <div><label class="flabel">Room name</label><input class="mini" name="name" value="${esc(r.name)}" required></div>
+        <div class="grid2"><div><label class="flabel">Type</label><select class="mini" name="type">${['Discussion Pod','Meeting Room'].map(t=>`<option ${r.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+          <div><label class="flabel">Seats</label><input class="mini" name="seats" type="number" min="1" max="40" value="${r.seats}" required></div></div>
+        <div class="grid2"><div><label class="flabel">Level</label><input class="mini" name="level" type="number" min="0" max="10" value="${r.level}" required></div>
+          <div><label class="flabel">Block</label><input class="mini" name="block" value="${esc(r.block)}" maxlength="3" required></div></div>
+        <div><label class="flabel">Facilities</label><input class="mini" name="features" value="${esc(r.features)}" placeholder="Whiteboard · Display"></div>
+        <label class="row" style="font-size:14px;font-weight:600"><input type="checkbox" name="active" ${r.active?'checked':''}> Available for booking</label>
+        <button class="btn">${d.id?'Save changes':'Add room'}</button><button type="button" class="btn ghost" data-act="close">Cancel</button>
+      </form>`);
+  },
+  roomDelAsk(d){
+    const r=room(d.id), n=S.bookings.filter(b=>b.roomId===r.id&&b.status==='confirmed').length;
+    modal(`<h2>Remove ${esc(r.name)}?</h2><p class="hint">${n?`<b>${n} upcoming booking${n>1?'s':''}</b> for this room will be cancelled. `:''}This cannot be undone.</p>
+      <div class="stack" style="margin-top:16px"><button class="btn danger" data-act="roomDel" data-id="${r.id}">Remove room</button><button class="btn outline" data-act="close">Keep room</button></div>`);
+  },
+  roomDel(d){
+    const r=room(d.id);
+    S.bookings.filter(b=>b.roomId===r.id&&b.status==='confirmed').forEach(b=>{b.status='cancelled';log('Admin','Cancelled (room removed)',b.ref);});
+    S.rooms = S.rooms.filter(x=>x.id!==r.id); log('Admin',`Removed room ${r.name}`,'—');
+    modal(''); toast(`${r.name} removed.`); rerender();
+  },
+  areaForm(d){
+    const a=S.areas.find(x=>x.id===d.id);
+    modal(`<h2>Edit ${esc(a.name)}</h2><form data-form="area" data-id="${a.id}" class="stack" style="margin-top:12px">
+      <div><label class="flabel">Location</label><input class="mini" name="loc" value="${esc(a.loc)}" required></div>
+      <div class="grid2"><div><label class="flabel">Seat capacity</label><input class="mini" name="cap" type="number" min="1" value="${a.cap}" required></div>
+      <div><label class="flabel">Estimated seats taken</label><input class="mini" name="taken" type="number" min="0" value="${a.taken}" required></div></div>
+      ${liveActive(a)?`<label class="row" style="font-size:14px;font-weight:600"><input type="checkbox" name="clearLive"> Clear live student report (${LV[a.live.level]})</label>`:''}
+      <button class="btn">Save changes</button><button type="button" class="btn ghost" data-act="close">Cancel</button></form>`);
+  },
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const fn = A[el.dataset.act]; if (fn) fn(el.dataset, el, e);
+});
+document.addEventListener('input', e => {
+  const k = e.target.dataset.bind; if (!k) return;
+  if (k==='logQ') { S.logQ = e.target.value; const pos=e.target.selectionStart; rerender(); const n=document.querySelector('[data-bind=logQ]'); n.focus(); n.setSelectionRange(pos,pos); }
+  else S.flow[k] = e.target.value;
+});
+document.addEventListener('change', e => { const k=e.target.dataset.bind; if (k && k!=='logQ') S.flow[k]=e.target.value; });
+
+function collectReg(){ const f=document.querySelector('[data-form=register]'); const o=Object.fromEntries(new FormData(f)); return {...o, free:(S.flow.reg?.free)||[]}; }
+const showErr = (id,msg) => document.getElementById(id).innerHTML = `<div class="notice bad">${I.info}<span>${esc(msg)}</span></div>`;
+
+document.addEventListener('submit', e => {
+  const f = e.target, kind = f.dataset.form; if (!kind) return; e.preventDefault();
+  const v = Object.fromEntries(new FormData(f));
+  if (kind==='login') {
+    const id = v.id.trim().toLowerCase();
+    const u = S.users.find(x => (x.email.toLowerCase()===id || x.matric.toLowerCase()===id) && x.password===v.pw);
+    if (!u) return showErr('lerr','Incorrect matric number/email or password.');
+    if (S.flow.adminLogin && u.role!=='admin') return showErr('lerr','This is not an administrator account. Use the student login instead.');
+    if (!S.flow.adminLogin && u.role==='admin') return showErr('lerr','Administrators must sign in through the admin login.');
+    S.user = u; S.flow = {}; go(u.role==='admin'?'admin':'home');
+  }
+  if (kind==='register') {
+    const r = S.flow.reg = collectReg();
+    if (!r.name.trim() || !r.matric.trim() || !r.email.trim()) return showErr('rerr','Please fill in your full name, matric number and email.');
+    if (!/^[A-Za-z]\d{6,9}$/.test(r.matric.trim())) return showErr('rerr','Matric number should look like U2100123.');
+    if (!/^\S+@\S+\.\S+$/.test(r.email)) return showErr('rerr','Please enter a valid email address.');
+    if (S.users.some(u=>u.matric.toLowerCase()===r.matric.trim().toLowerCase()||u.email.toLowerCase()===r.email.trim().toLowerCase())) return showErr('rerr','An account with this matric number or email already exists.');
+    if ((r.pw||'').length < 6) return showErr('rerr','Password must be at least 6 characters.');
+    if (r.pw !== r.pw2) return showErr('rerr','Passwords do not match.');
+    if (!r.free.length) return showErr('rerr','Pick at least one usual free time.');
+    S.users.push({id:'u'+(S.users.length+1),role:'student',name:r.name.trim(),matric:r.matric.trim().toUpperCase(),email:r.email.trim(),password:r.pw,area:r.area,free:r.free});
+    S.flow = {prefill:r.matric.trim().toUpperCase(), okMsg:'Account created! Log in with your new password.'}; go('login');
+  }
+  if (kind==='search') { Object.assign(S.flow,{day:+v.day,cap:+v.cap,type:v.type,roomId:null,sel:[],msg:''}); go('rooms'); }
+  if (kind==='profile') {
+    if (!v.name.trim()||!v.matric.trim()||!/^\S+@\S+\.\S+$/.test(v.email)) return showErr('perr','Please enter a name, matric number and valid email.');
+    if (!S.draftFree.length) return showErr('perr','Pick at least one usual free time.');
+    Object.assign(S.user,{name:v.name.trim(),matric:v.matric.trim(),email:v.email.trim(),area:v.area,free:[...S.draftFree]});
+    S.editProfile=false; toast('Profile updated.'); rerender();
+  }
+  if (kind==='room') {
+    const id=f.dataset.id, data={name:v.name.trim(),type:v.type,seats:+v.seats,level:+v.level,block:v.block.trim().toUpperCase(),features:v.features.trim(),active:!!v.active};
+    if (id) { Object.assign(room(id),data); log('Admin',`Edited room ${data.name}`,'—'); }
+    else { S.rooms.push({id:'r'+Date.now(),...data}); log('Admin',`Added room ${data.name}`,'—'); }
+    modal(''); toast(id?'Room updated.':'Room added.'); rerender();
+  }
+  if (kind==='area') {
+    const a=S.areas.find(x=>x.id===f.dataset.id);
+    a.loc=v.loc; a.cap=Math.max(1,+v.cap); a.taken=Math.min(a.cap,Math.max(0,+v.taken)); a.upd=now(); if (v.clearLive) a.live=null;
+    log('Admin',`Updated common area ${a.name}`,'—'); modal(''); toast('Common area updated.'); rerender();
+  }
+});
+
+/* live tick: countdowns + status rules */
+setInterval(() => {
+  if (applyRules() && !document.querySelector('#modal .scrim') && !document.activeElement?.matches('input,select')) return rerender();
+  document.querySelectorAll('[data-countdown]').forEach(el => {
+    const end=+el.dataset.countdown, left=end-now(); el.textContent=countdown(left);
+    const s=document.getElementById('session'); if (s && left<=15*M && !s.classList.contains('ending')) rerender();
+  });
+  document.querySelectorAll('[data-progress]').forEach(el => { const [s,e]=el.dataset.progress.split('|').map(Number); el.style.width=Math.max(0,(e-now())/(e-s)*100)+'%'; });
+}, 1000);
+
+render();
+</script>
+</body>
+</html>
